@@ -1,0 +1,55 @@
+#!/usr/bin/python
+
+
+import os
+import datetime
+
+ys=datetime.datetime.today()
+nd=ys - datetime.timedelta(days=1)
+s = str(nd)
+
+sd = s[0:10]
+
+ssd=sd.split('-')
+
+yd = ssd[0]
+md = ssd[1]
+dd = ssd[2]
+ext = '.avi'
+
+#md='07'
+
+if md == '06':
+    md='Jun'
+
+if md == '07':
+    md='Jul'
+
+tdat = yd+'-'+md+'-'+dd+ext
+fpath_penta='/ya/penta/'+tdat
+fpath_karg='/ya/karg/'+tdat
+print fpath_penta
+
+td=str(fpath_penta)
+
+if os.path.exists(fpath_penta):
+    print 'ok'
+    print td + ' ' +(str(os.path.getsize(fpath_penta)/1024) + ' Kb')
+
+
+else:
+    print 'Error. Check file in folder /ya/penta'
+
+
+td=str(fpath_karg)
+
+if os.path.exists(fpath_karg):
+    print 'ok'
+    print td + ' ' +(str(os.path.getsize(fpath_karg)/1024) + ' Kb')
+
+
+else:
+    print 'Error. Check file in folder /ya/karg'
+
+
+

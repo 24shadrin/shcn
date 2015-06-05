@@ -1,0 +1,51 @@
+#!/usr/bin/python
+
+
+import os
+import datetime
+
+ys=datetime.datetime.today()
+nd=ys - datetime.timedelta(days=1)
+s = str(nd)
+
+sd = s[0:10]
+
+ssd=sd.split('-')
+
+yd = ssd[0]
+md = ssd[1]
+dd = ssd[2]
+ext = '.avi'
+tjost = yd+'-'+md+'-'+dd+ext
+#md='07'
+
+if md == '06':
+    md='Jun'
+
+if md == '07':
+    md='Jul'
+
+tdat = yd+'-'+md+'-'+dd+ext
+fpath_penta='/ya/penta/'+tdat
+fpath_karg='/ya/karg/'+tdat
+fpath_cam1='/ya/jost/camera1/'+tjost
+fpath_cam3='/ya/jost/camera3/'+tjost
+
+filo = open('/etc/mysc/ch_ya_res', 'w')
+
+#----------------------------------------------------------
+def ch_path(n):
+    if os.path.exists(n):
+	filo.write ('ok'+'\n')
+	filo.write(n + ' ' +(str(os.path.getsize(n)/1024) + ' Kb') + '\n')
+
+    else:
+	filo.write (('Error. Check file  ' + n) + '\n')
+#----------------------------------------------------------
+
+ch_path(fpath_penta)
+ch_path(fpath_karg)
+ch_path(fpath_cam1)
+ch_path(fpath_cam3)
+
+filo.close()
