@@ -16,7 +16,7 @@ yd = ssd[0]
 md = ssd[1]
 dd = ssd[2]
 ext = '.avi'
-
+tjost = yd+'-'+md+'-'+dd+ext
 #md='07'
 
 if md == '06':
@@ -28,28 +28,42 @@ if md == '07':
 tdat = yd+'-'+md+'-'+dd+ext
 fpath_penta='/ya/penta/'+tdat
 fpath_karg='/ya/karg/'+tdat
-print fpath_penta
+fpath_cam1='/ya/jost/camera1/'+tjost
+fpath_cam3='/ya/jost/camera3/'+tjost
 
-td=str(fpath_penta)
+filo = open('/etc/mysc/ch_ya_res', 'w')
 
-if os.path.exists(fpath_penta):
-    print 'ok'
-    print td + ' ' +(str(os.path.getsize(fpath_penta)/1024) + ' Kb')
+#---------------------------------------------------------
+dat = datetime.datetime.today()
+dat = str(dat)
+tm = dat.split(' ')
+dd = tm[0]
+dt = tm[1]
+ddt = dt.split('.')
+ddt2 = str(ddt[0])
+ddt3 = ddt2.split(':')
+tt = dd + ' ' + ddt3[0] + '>' + ddt3[1] + '>' + ddt3[2]
+#--------------------------------------------------------
 
-
-else:
-    print 'Error. Check file in folder /ya/penta'
-
-
-td=str(fpath_karg)
-
-if os.path.exists(fpath_karg):
-    print 'ok'
-    print td + ' ' +(str(os.path.getsize(fpath_karg)/1024) + ' Kb')
-
-
-else:
-    print 'Error. Check file in folder /ya/karg'
+filo.write(tt + '\n')
 
 
+#----------------------------------------------------------
+def ch_path(n):
+    if os.path.exists(n):
+	filo.write ('ok'+'\n')
+	filo.write(n + ' ' +(str(os.path.getsize(n)/1024) + ' Kb') + '\n')
 
+    else:
+	filo.write (('Error. Check file  ' + n) + '\n')
+#----------------------------------------------------------
+
+ch_path(fpath_penta)
+ch_path(fpath_karg)
+ch_path(fpath_cam1)
+ch_path(fpath_cam3)
+
+filo.close()
+
+
+os.system("/bin/cat /etc/mysc/ch_ya_res | /usr/sbin/ssmtp n.v.shadrin@gmail.com")
