@@ -33,6 +33,21 @@ fpath_cam3='/ya/jost/camera3/'+tjost
 
 filo = open('/etc/mysc/ch_ya_res', 'w')
 
+#---------------------------------------------------------
+dat = datetime.datetime.today()
+dat = str(dat)
+tm = dat.split(' ')
+dd = tm[0]
+dt = tm[1]
+ddt = dt.split('.')
+ddt2 = str(ddt[0])
+ddt3 = ddt2.split(':')
+tt = dd + ' ' + ddt3[0] + '>' + ddt3[1] + '>' + ddt3[2]
+#--------------------------------------------------------
+
+filo.write(tt + '\n')
+
+
 #----------------------------------------------------------
 def ch_path(n):
     if os.path.exists(n):
@@ -49,3 +64,6 @@ ch_path(fpath_cam1)
 ch_path(fpath_cam3)
 
 filo.close()
+
+
+os.system("/bin/cat /etc/mysc/ch_ya_res | /usr/sbin/ssmtp n.v.shadrin@gmail.com")
