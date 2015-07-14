@@ -25,6 +25,9 @@ if md == '06':
 if md == '07':
     md='Jul'
 
+if md == '08':
+    md='Aug'
+
 tdat = yd+'-'+md+'-'+dd+ext
 fpath_penta='/ya/penta/'+tdat
 fpath_karg='/ya/karg/'+tdat
@@ -51,11 +54,15 @@ filo.write(tt + '\n')
 #----------------------------------------------------------
 def ch_path(n):
     if os.path.exists(n):
-	filo.write ('ok'+'\n')
+	filo.write ("************************"+'\n')
+	filo.write ('ok'+' ')
 	filo.write(n + ' ' +(str(os.path.getsize(n)/1024) + ' Kb') + '\n')
+	filo.write ("************************"+'\n')
 
     else:
+	filo.write ("************************"+'\n')
 	filo.write (('Error. Check file  ' + n) + '\n')
+	filo.write ("************************"+'\n')
 #----------------------------------------------------------
 
 ch_path(fpath_penta)
