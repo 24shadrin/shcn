@@ -1,0 +1,111 @@
+#!/bin/sh
+
+#Это для переименования файлов. Если они не совпадают
+dt=$(date | awk '{print $3"_"$2"_"$6"_"}')
+tm=$(date |awk '{print $4}' |awk -F ":" '{print $1"_"$2"_"$3}')
+rmfile=$dt$tm
+echo $rmfile
+
+email=/etc/mysc/smartcopy/cam3/email
+
+#это защита от повторного запуска скрипта
+lc=/etc/mysc/smartcopy/cam3/lock
+
+if [ -f $lc ]; then 
+echo "Process already running. Please wait and try again later."
+exit
+    else
+{
+date > $lc
+
+#Удаленные и локальные директории
+rpath="/video/zhostovo/camera3"
+lpath="/video_done/camera3"
+
+#Это для получения имени вчерашнего файла
+a1=$(date -d "yesterday" | awk '{print $6}')
+sec=$(date -d "yesterday" | awk '{print $2}')
+a3=$(date -d "yesterday" | awk '{print $3}')
+
+case $sec in
+Jan) a2=01 ;;
+Feb) a2=02 ;;
+Mar) a2=03 ;;
+Apr) a2=04 ;;
+May) a2=05 ;;
+Jun) a2=06 ;;
+Jul) a2=07 ;;
+Aug) a2=08 ;;
+Sep) a2=09 ;;
+Oct) a2=10 ;;
+Nov) a2=11 ;;
+Dec) a2=12 ;;
+esac
+
+case $a3 in
+1) a3=01 ;;
+2) a3=02 ;;
+3) a3=03 ;;
+4) a3=04 ;;
+5) a3=05 ;;
+6) a3=06 ;;
+7) a3=07 ;;
+8) a3=08 ;;
+9) a3=09 ;;
+esac
+
+ext=".avi"
+#Имя файла с расширением
+filo=$a1-$a2-$a3$ext
+
+#filo=2015-12-05
+
+echo $filo
+#ищем файл на удаленной машине
+fpath=$(ssh root@192.168.0.200 -i ~/.ssh/kargos  ls  $rpath/$filo)
+echo $fpath
+
+#если файл не существует
+if [ -f $fpath ]; then 
+echo "cam3 NO filo does not exist" > $email
+#копируем файл на удаленную машину
+scp -i ~/.ssh/kargos $lpath/$filo root@192.168.0.200:/$rpath/$filo
+echo "cam1 copy file completed" >> $email
+
+    else echo "YES file is here"
+#если существует, то проверяем совпадают ли размер имя и день создания
+
+rday=$(ssh root@192.168.0.200 -i ~/.ssh/kargos ls -l $rpath/$filo | awk '{print $7}')
+echo $rday
+
+rsize=$(ssh root@192.168.0.200 -i ~/.ssh/kargos ls -l $rpath/$filo | awk '{print $5}')
+echo $rsize
+
+rname=$(ssh root@192.168.0.200 -i ~/.ssh/kargos ls -l $rpath/$filo | awk '{print $9}' | awk -F "/" '{print $5}')
+echo $rname
+
+lday=$(ls -l $lpath/$filo | awk '{print $7}')
+echo $lday
+
+lsize=$(ls -l $lpath/$filo | awk '{print $5}')
+echo $lsize
+
+lname=$(ls -l $lpath/$filo | awk '{print $9}' | awk -F "/" '{print $4}')
+echo $lname
+
+if [ $rday == $lday ] && [ $rsize == $lsize ] && [ $rname == $lname ]; then
+echo "cam3 OK it is a same file $filo" > $email
+    else echo "cam3 wrong. File is differents" > $email
+#Если что-то не совпадает копируем файл еще раз, но сначала делаем его копию
+ssh root@192.168.0.200 -i ~/.ssh/kargos cp $rpath/$filo $rpath/$rmfile
+scp -i ~/.ssh/kargos $lpath/$filo root@192.168.0.200:/$rpath/$filo
+
+#удаляем защиту от повторного запуска
+
+fi
+fi
+}
+fi
+rm $lc
+/bin/cat $email | /usr/sbin/ssmtp "n.v.shadrin@gmail.com"
+
