@@ -1,0 +1,56 @@
+#!/bin/sh
+
+email=/etc/mysc/jost/email1
+
+dt=$(date | awk '{print $3"_"$2"_"$6"_"}')
+tm=$(date |awk '{print $4}' |awk -F ":" '{print $1"_"$2"_"$3}')
+dt=$dt$tm
+echo "start" > $email
+echo $dt >> $email
+echo "" >> $email
+
+
+ssh root@10.14.14.5 /etc/mysc/jost/camera1
+
+rm /temp/camera1.tar
+
+scp root@10.14.14.5:/temp/camera1.tar /temp/camera1.tar
+
+cd /temp
+
+rm -R /video/camera1/*
+
+tar xvf camera1.tar -C /video
+
+cd /video/camera1
+
+cp /etc/mysc/rename /video/camera1/rename
+
+file=$(ls -l | awk '{if ($5==0) print $0}' | awk '{print $9}' | wc | awk '{print $1}')
+ls -l | awk '{if ($5==0) print $0}' | awk '{print $9}' >> $email
+if [ $file != 0 ]; then
+
+echo "$file null file detected" >> $email
+cd /video/camera1 && ls -l | awk '{if ($5==0) print $0}' | awk '{print $9}' | xargs rm
+else
+echo "OK. All files is good and I do nothing" >> $email
+fi
+
+echo "" >> $email
+
+
+/video/camera1/rename
+
+dat=`date -d "yesterday" +%Y-%m-%d`
+
+ffmpeg -r 10 -i %06d.jpg -r 10 -vcodec mjpeg -qscale 1  /video_done/camera1/$dat.avi
+
+cp /video_done/camera1/$dat.avi /ya/jost/camera1/$dat.avi
+
+dt=$(date | awk '{print $3"_"$2"_"$6"_"}')
+tm=$(date |awk '{print $4}' |awk -F ":" '{print $1"_"$2"_"$3}')
+dt=$dt$tm
+echo "The End" >> $email
+echo $dt >> $email
+
+/bin/cat $email | /usr/sbin/ssmtp "n.v.shadrin@gmail.com"
